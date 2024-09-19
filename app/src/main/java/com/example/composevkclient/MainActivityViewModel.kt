@@ -10,9 +10,10 @@ import kotlin.random.Random
 
 class MainActivityViewModel : ViewModel() {
     private val initialList = mutableListOf<FeedPost>().apply {
-        repeat(100) {
+        repeat(10) {
             add(
                 FeedPost(
+                    id = it,
                     communityName = "$it /dev/null",
                     publicationDate = "${Random.nextInt(24)}:${Random.nextInt(60)}",
                     avatarResId = R.drawable.avatar,
@@ -28,47 +29,21 @@ class MainActivityViewModel : ViewModel() {
     val models = _models as State<List<FeedPost>>
 
     fun increaseCount(model: FeedPost, typeStatistics: StatisticsType) {
-        val modifiedList = models.value.toMutableList().apply {
-            replaceAll { oldItem ->
-                if (oldItem == model) {
-                    when (typeStatistics) {
-                        StatisticsType.VIEWS -> {
-                            oldItem.copy(
-                                statistics = oldItem.statistics.copy(
-                                    views = oldItem.statistics.views + 1
-                                )
-                            )
-                        }
+        val modifiedList = models.value.toMutableList()
+        val index = modifiedList.indexOf(model)
+        modifiedList[index] = model.copy(statistics = (with(model.statistics) {
+            when (typeStatistics) {
+                StatisticsType.VIEWS -> copy(views = model.statistics.views + 1)
 
-                        StatisticsType.COMMENTS -> {
-                            oldItem.copy(
-                                statistics = oldItem.statistics.copy(
-                                    comments = oldItem.statistics.comments + 1
-                                )
-                            )
-                        }
+                StatisticsType.COMMENTS -> copy(comments = model.statistics.comments + 1)
 
-                        StatisticsType.SHARES -> {
-                            oldItem.copy(
-                                statistics = oldItem.statistics.copy(
-                                    shares = oldItem.statistics.shares + 1
-                                )
-                            )
-                        }
+                StatisticsType.LIKES -> copy(likes = model.statistics.likes + 1)
 
-                        StatisticsType.LIKES -> {
-                            oldItem.copy(
-                                statistics = oldItem.statistics.copy(
-                                    likes = oldItem.statistics.likes + 1
-                                )
-                            )
-                        }
-                    }
-                } else {
-                    oldItem
-                }
+                StatisticsType.SHARES -> copy(shares = model.statistics.shares + 1)
             }
         }
+                )
+        )
         _models.value = modifiedList
     }
 
